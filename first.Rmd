@@ -1,0 +1,58 @@
+---
+title: "my first markdown file"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(readr)
+library(ggplot2)
+```
+
+library(dplyr)
+library(readr)
+library(ggplot2)
+
+
+
+
+
+```{r}
+
+```
+
+## Reading the Data
+
+
+```{r}
+
+```
+
+
+## Plotting the Data
+
+
+```{r}
+mine <- read_csv("C:\\Users\\dl7ke\\Desktop\\fav_restaurants1.csv")
+```
+
+
+```{r}
+ggplot(mine, aes(cuisine)) +
+  geom_bar()
+```
+
+This chart represents the amount of students who chose the given cuisines as one of their favorite restaurants. Seems like people enjoy American food.
+```{r}
+ggplot(mine, aes(cuisine, cost_per_person)) +
+  geom_point()
+```
+
+This graph shows the cost per person at each given type of cuisine.
+```{r}
+ggplot(mine, aes(location, cost_per_person)) +
+  geom_col()
+```
+
+This graph shows the total money spent for each given location
