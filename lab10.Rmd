@@ -1,0 +1,130 @@
+---
+title: "Lab 10: Filtering Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8.5)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+theme_set(theme_minimal())
+```
+
+## Pick a dataset
+
+Today you will again have a choice of three datasets to work with. You can
+choose either to investigate the daily team ELO ratings in the NBA:
+
+```{r}
+nba <- read_csv("https://statsmaths.github.io/stat_data/nba_elo_daily.csv")
+```
+
+```{r}
+nba_cavs <- filter(nba, team == "CLE")
+
+```
+
+```{r}
+ggplot(nba_cavs, aes(date, elo)) +
+  geom_line()
+```
+
+This graph shows the cyclical nature of the Cleveland Cavaliers. This is a healthy graph for a team from the perspective of the NBA. As teams have bad seasons, they should get higher draft picks which in turn, makes them a better team and more successful.
+
+```{r}
+cle_after_2003 <- filter (nba_cavs, season >= 2003)
+```
+
+
+```{r}
+ggplot(cle_after_2003, aes(date, elo)) +
+  geom_line()
+```
+
+THis graph shows the team's success since 2003, they year that LeBron James was drafted to them team.
+
+```{r}
+cle_wo_lebron <- filter(cle_after_2003, season %in% c(2011, 2012, 2013, 2014))
+```
+
+
+```{r}
+ggplot(cle_after_2003, aes(date, elo)) +
+  geom_line() +
+  geom_line(color = "red", data = cle_wo_lebron)
+```
+
+This is the same graph as above. However, this graph highlights the years where LeBron went and played in Miami. As the graph shows, the organization struggled to have success without their star player. However, when he returned the team was significantly more successful.
+
+```{r}
+mia_since_2003 <- filter(nba, team == "MIA", season >= 2003)
+```
+
+```{r}
+ggplot(mia_since_2003, aes(date, elo)) +
+  geom_line() +
+```
+
+This graph shows the elo of the Miami Heat since the drafting of LeBron James to the Cavaliers.
+
+```{r}
+mia_with_lebron <- filter(nba, team == "MIA", season >= 2010, season <= 2014)
+```
+
+```{r}
+ggplot(mia_since_2003, aes(date, elo)) +
+  geom_line() +
+  geom_line(color = "red", data = mia_with_lebron)
+```
+
+As before, this graph highlights the elo of the Heat while LeBron James was on their team. Similarly as the Cavs, the Heat were successful when Lebron was wearing their jersey and significantly less successful once he left.
+
+
+
+
+
+
+
+
+
+
+
+
+Pick a dataset (feel free to delete the others from the Rmd file if you would
+like), and work on the instructions in the next section.
+
+## Instructions
+
+This lab is similar to the last. You'll pick a dataset and then generate an
+analysis of that data using data visualizations. The difference here is that
+instead of a single plot, I would like you to construct 3-4 plots that
+together tell a linear story. Each plot should be separated by a sentence or
+two describing what the viewer should take away from the plot. Try to keep the
+plots similar in some way; perhaps each simply highlights a different subset
+of the data but has the same underlying layers.
+
+Notice that each of the datasets for today are larger than you will probably
+be able to use. You will need to filter the data to a particular team, year,
+subset of curse words. You may further filter the data to highlight an even
+smaller subset of the data within each plot.
+
+## Analysis
+
+
+
+
+
+
+
+
+
+
