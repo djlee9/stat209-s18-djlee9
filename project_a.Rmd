@@ -1,0 +1,112 @@
+---
+title: "Louisville vs. George Mason Baseball Game"
+author: "DJ Lee"
+output: html_notebook
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+```
+
+# Louisville vs. George Mason Baseball
+
+## Overview
+
+In Project A I collected data while watching the University of Louisville baseball team play the George Mason University baseball team in Charleston, South Carolina. While waiting for the University of Richmond's baseball team to play their game, I recorded each player's At-Bat, the number of pitches they saw, and the type of pitches they put in play depending on the current situation of the game. My goal in this data set was to explore the type of pitches that batters put in play in certain situations throughout the game, particularly with runners on base. Finding trends in certain scenarios could give hitters an advantage as to what type of pitches to look for at the plate.
+
+## Data dictionary
+
+Here is a data dictionary for the "baseball" dataset:
+  
+  - **name**: a character variable that gives each player's last name that was presented on the scoreboard during the batter's At-Bat.
+- **team**: a categorical variable giving the team name of the batter. Possible options are:
+    - "Louisville"
+    - "George Mason"
+- **runners_on_base**: a numeric variable giving the total number of runners that were on base when the batter was hitting.
+- **pitches_seen**: a numeric variable giving the total amount of pitches that were thrown to the batter during their At-Bat.
+- **pitch_in_play**: a character variable describing the type of pitch that the batter put in play. (For Strike Outs and Walks, this pitch was technically not "put in play", but still decided the outcome of the At-Bat, and therefore is included in this variable).
+- **result**: a character variable that describes the outcome of the batter's At-Bat.
+
+
+Which can be read in as follows:
+  
+```{r}
+baseball <- read_csv("https://raw.githubusercontent.com/urstats/stat209-s18-djlee9/master/project_a.csv")
+baseball
+```
+
+## Exploratory Analysis
+
+Throughout the course of a game a pitcher will throw multiple different pitches - fastballs, sliders, cutters, sinkers, etc. - but what really sets pitchers apart is their ability to throw any given pitch in any given situation. Knowing what pitcher's tendancies are with runners on base can give hitters insight as to what pitches to look for when they are at the plate. More times than not, a pitcher will not have much pressure from multiple baserunners at the same time.
+
+```{r, echo=FALSE}
+ggplot(baseball, aes(runners_on_base)) +
+  geom_bar()
+```
+
+It is said that the fastball is the best pitch in baseball. Normally, a fastball is the easiest pitch for a hitter to hit; however, it is also the easiest pitch for a pitcher to "command", or throw in the location that they want it to. Due to these facts it is common for pitchers to throw a majority of their pitches as fastballs throughout a given game.
+
+```{r, echo=FALSE}
+ggplot(baseball, aes(pitch_in_play)) +
+  geom_bar()
+```
+
+Though it is the easiest pitch for a hitter to hit, as we saw above, the pitcher normally doesn't have to worry about runners on base. This means that the pitcher doesn't have to worry about the hitter driving in any runners from the bases, making it easier and more comfortable for him to throw a fastball and challenge the hitter to hit it. If the hitter gets a hit, it's relatively inconsequential for the pitcher because there were no runners on base to score. However, let's see how the pitcher's pitch selection changes with runners on base.
+
+```{r}
+baseball_0 <- filter(baseball, runners_on_base == 0)
+baseball_0
+```
+
+```{r}
+baseball_1 <- filter(baseball, runners_on_base == 1)
+baseball_1
+```
+
+```{r}
+baseball_2 <- filter(baseball, runners_on_base == 2)
+baseball_2
+```
+
+```{r}
+baseball_3 <- filter(baseball, runners_on_base == 3)
+baseball_3
+```
+
+```{r}
+ggplot(baseball_1, aes(pitch_in_play)) +
+  geom_bar() +
+  ggtitle("1 Runner on Base") +
+  xlab("Pitch")
+```
+
+
+```{r, echo=FALSE}
+ggplot(baseball_2, aes(pitch_in_play)) +
+  geom_bar() +
+  ggtitle("2 Runners on Base") +
+  xlab("Pitch")
+```
+
+As the charts above show, the amount of "off-speed pitches" (pitches that aren't fastballs), dramatically increases with runners on base, especially with two runners on base. Pitchers have to worry about the damage that a hitter can do in these situations. With runners on base, a simple base hit could potentially lead to multiple runners scoring, forcing the pitcher to be more cautious in the pitches that he chooses to throw.
+                                                            
+```{r}
+ggplot(baseball_3, aes(pitch_in_play)) +
+  geom_bar() +
+  ggtitle("3 Runners on Base") +
+  xlab("Pitch")
+```
+                                                            
+What is interesting about this set of data is that there were only three instances in which there were three runners on base, or in baseball terminology "the bases were loaded". This means that if the pitcher walks the batter, all the baserunners would move up one base and they would score a run. As mentioned earlier, a fastball is the easiest pitch for a pitcher to "command" (or locate) and might be the best explanation for the graph above. The fear of walking a batter with "off-speed" pitches outweighs the fear of the batter getting a hit from the fastball.
+                                                            
+## Conclusion
+                                                            
+From this data, we can draw many conclusions about pitcher's tendancies when choosing which pitch to throw to hitters. One drawback to this set of data is that it only shows which pitches were "put in play", or hit by the batter. It does not show all the other pitches that the batter saw in that At-Bat. Additionally, including the score of the game and the type of hitter (power hitter, contact hitter, etc.) would also give significantly deeper insight into this set of exploratory data.
+                                                            
+## References
+                                                            
+N/A
