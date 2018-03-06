@@ -1,0 +1,174 @@
+---
+title: "The Divide in Chicago"
+author: "DJ Lee"
+output: html_notebook
+---
+  
+
+
+```{r}
+install.packages("forcats")
+```
+
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8.5)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggmap)
+library(viridis)
+library(forcats)
+library(ggrepel)
+```
+
+
+
+```{r}
+tracts <- read_csv("https://raw.githubusercontent.com/statsmaths/stat_data/gh-pages/acs_tract_data_2016.csv.gz")
+```
+
+
+```{r}
+illinois <- filter(tracts, state == "Illinois")
+chicago <- filter (illinois, cbsa == "Chicago-Naperville-Elgin, IL-IN-WI")
+chi_higher_pop <- filter (chicago, population > 7500)
+chicago_proper <- filter (chicago, county == "Cook County")
+south_suburbs <- filter (chicago, lat < 41.88)
+north_suburbs <- filter (chicago, lat > 41.88)
+temp <- select(chicago_proper, starts_with("race_"))
+chicago_proper$max_race_category <- names(temp)[apply(temp, 1, which.max)]
+chicago_poor <- filter (chicago, hh_income_q5 <= 30000)
+
+max_black <- filter(chicago_proper, max_race_category == "race_black")
+
+```
+
+
+
+# The Racial Divide
+
+The racial divide in Chicago has never really been a secret. However, the origin story to this divide may not be as commonly known. The roots of the racial divide, like many large cities across the United States, are no accident and can be traced back to federal regulation and policy. As the African American population began to grow in the early 20th century, they began to face housing and real estate practices that were totally racist. Redlining occurred across the country and particularly in Chicago allowing banks to refuse home loans to black families, especially in good neighborhoods. Federal regulation pushed white families into suburban neighborhoods and black families into urban areas.
+
+Today these racial implications still exist. If you mention the north side of Chicago to anybody familiar with the area, you are implicitly speaking about the white side of Chicago. Contrarily, when mentioning the south side of Chicago, you are implicitly speaking about the black side of Chicago. These implications have become almost normal for Chicagoans, the racial divide is something that Chicagoans have grown up in, currently live with, and eventually become completely blind to the problems that it causes on its social constructs, its culture, and its economy.
+
+
+
+```{r}
+qmplot(lon, lat, data = chicago_proper, geom = "blank") +
+  geom_point(aes(color = max_race_category), alpha = 0.8, size = 4) +
+  annotate("point", x = -87.643, y = 41.855, color = "Red", size = 30, alpha = 0.3) +
+  annotate("text", x = -87.565, y = 41.855, label = "Downtown", color = "Red", size = 7, alpha = .8) +
+  annotate("text", x = -87.73, y = 41.88, label = "West Side", color = "Dark Green", size = 8) +
+  annotate("text", x = -87.633, y = 41.759, label = "South Side", color = "Dark Green", size = 12) +
+  annotate("text", x = -87.645, y = 41.95, label = "North Side", color = "purple", size = 12)
+  
+```
+
+
+# The Wealth Divide
+Chicago has, for a long time, been known for having some of the worst and most violent neighborhoods in the country. For years, headlines about the city of Chicago have been dominated by crime, shootings, and the lost lives of innocent children, much of which can be traced back to poverty.
+
+The racial divide in Chicago has also, inevitably, lead to a divide in wealth as well. Decades of government policies have been put in place to try and undo the segregation that has affected the wealth divide and inequality surrounding Chicago. Suburbs with predominantly black neighborhoods have been held down by overpopulation and public inequity, causing the divide in income to widen even further. White suburbs have long had access to safe and growing neighborhoods and highways to get there. 
+
+The following graph show how great the income divide in Chicago really is with its segregated neighborhoods.
+
+
+```{r}
+ggplot(chicago, aes(race_black, hh_income_q5)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue", se = FALSE, linetype = "dashed", size = 2) +
+  annotate("rect", xmin = -1, xmax = 10, ymin = 0, ymax = 1050000, fill = "blue", alpha = 0.2) +
+  annotate("text", x = 30, y = 930000, label = "Black population of 10% or less", size = 10, color = "blue") +
+  annotate("rect", xmin = 85, xmax = 101, ymin = 0, ymax = 250000, fill = "black", alpha = 0.1) +
+  annotate("text", x = 85, y = 300000, label = "Black population of 85% or more", size = 10)
+```
+
+
+Chicago white households are wealthier than the nation's average and the city's African-Americans are significantly less wealthy than the national average (Asante-Muhammad, 17). Children have been (and still are)  growing up in neighborhoods that were designed to keep them separated from white children, who are blessed with affluence and opportunity that many black children will never know.
+
+The gini coefficient has long been used to measure inequality in income or wealth. A high gini coefficient represents a large dispersion in income, while a low gini shows a similarity and low deviation in income among residents.  We can first note that Chicago as a whole experiences higher wealth inequality than the US average. When looking at the gini coefficient among different income classes, we can see that the largest deviations in income come from the poorest neighborhoods and the smallest deviation occurs in the middle income families. 
+
+
+```{r}
+ggplot(chicago_proper, aes(hh_income_q2, hh_gini)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "blue", se = "FALSE", size = 2) +
+  geom_line(aes(y = 0.4), size = 2, color = "dark blue") +
+  annotate("text", x = 125000, y = 0.38, label = "US average", size = 12, color = "dark blue") +
+  annotate("rect", xmin = 0, xmax = 34999, ymin = .3, ymax = .71, fill = "red", alpha = 0.1) +
+  annotate("rect", xmin = 35000, xmax = 99999, ymin = .3, ymax = .71, fill = "blue", alpha = 0.1) +
+  annotate("rect", xmin = 100000, xmax = 150000, ymin = .3, ymax = .71, fill = "green", alpha = 0.1) +
+  annotate("text", x = 17000, y = .68, label = "Low Income", size = 12, color = "red") +
+  annotate("text", x = 65000, y = .68, label = "Middle Class", size = 12, color = "blue") +
+  annotate("text", x = 125000, y = .68, label = "Upper Class", size = 12, color = "dark green")
+```
+
+
+## References
+
+Dedrick Asante-Muhammad, the director of the Racial Wealth Divide Initiative of the nonprofit group, which did the study with a grant from JP Morgan - Cited by Chicago Tribune
+
+Sarah Nasr - AJ+
+
+
+
+
+
+```{r}
+ggplot(chicago_proper, aes(hh_gini)) +
+  geom_area(stat = "bin") +
+  facet_wrap(~max_race_category) +
+  annotate("rect", xmin = 0.41, xmax = 0.45, ymin = 0, ymax = 110, color = "blue", alpha = 0.2)
+  
+```
+
+
+```{r}
+ggplot(chicago_proper, aes(max_race_category, hh_gini)) +
+  geom_col()
+```
+
+
+```{r}
+ggplot(chicago_proper, aes(hh_income_q2, hh_gini)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "blue", se = "FALSE", size = 2) +
+  geom_line(aes(y = 0.4), size = 2, color = "dark blue") +
+  annotate("text", x = 125000, y = 0.38, label = "US average", size = 12, color = "dark blue") +
+  annotate("rect", xmin = 0, xmax = 34999, ymin = .3, ymax = .71, fill = "red", alpha = 0.1) +
+  annotate("rect", xmin = 35000, xmax = 99999, ymin = .3, ymax = .71, fill = "blue", alpha = 0.1) +
+  annotate("rect", xmin = 100000, xmax = 150000, ymin = .3, ymax = .71, fill = "green", alpha = 0.1) +
+  annotate("text", x = 17000, y = .68, label = "Low Income", size = 12, color = "red") +
+  annotate("text", x = 65000, y = .68, label = "Middle Class", size = 12, color = "blue") +
+  annotate("text", x = 125000, y = .68, label = "Upper Class", size = 12, color = "dark green")
+```
+
+
+```{r}
+ggplot(chicago_proper, aes(max_race_category)) +
+  geom_bar() +
+  geom_point(aes(x = racey = median_rent))
+```
+
+
+```{r}
+ggplot(chicago_proper, aes(max_race_category, median_rent)) +
+  geom_col()
+```
+
+```{r}
+qmplot(lon, lat, data = chicago_proper, geom = "blank") +
+  geom_point(aes(color = hh_income_q2), size = 5) + 
+  scale_color_viridis() +
+   annotate ("rect", xmin = -87.56, xmax = -87.7, ymin = 41.881832, ymax = 42.5, fill = "blue", alpha = 1)
+```
+
+
