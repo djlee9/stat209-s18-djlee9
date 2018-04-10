@@ -1,0 +1,88 @@
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8.5)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(viridis)
+library(forcats)
+library(smodels)
+```
+
+
+```{r}
+stats <- read_csv("https://raw.githubusercontent.com/URstats/stat209-s18-djlee9/1e895d2984cdec6e7579f1379701e2b1f4a851f8/a10_stats.csv")
+```
+
+# Introduction
+The models found in this data analysis attempt to explore different baseball statistics of 108 different baseball players throughout the Atlantic 10 conference.
+
+Many sabermetric baseball analysts debate over the most important statistic in baseball. Although I do not believe there is one statistic that can be independently predictive of a baseball player's success and added value to a team, I think that both hits and OPS should be relatively strong predictors of runs scored, with heavily positive correlations.
+
+# Methods
+Each data point represents a baseball player from one of the following schools: Davidson, Fordham, George Mason, George Washington, Massachusetts, and Richmond. There are three statistics used in this regression analysis: runs, hits, and OPS (On-base Plus Slugging-percentage). The analysis is meant to find the correlation between teams and runs, OPS and runs, as well as hits and runs.
+
+# Results
+#### Regression by Schools
+```{r}
+r_model <- lm_basic(runs ~ school, data = stats)
+reg_table(r_model, level = 0.95)
+```
+```{r}
+ggplot(stats, aes(school, runs)) +
+  geom_col()
+```
+
+This regression shows the correlations between runs scored and school. Notice that schools that predict lower runs scored per player also have higher runs scored as a team.
+
+
+```{r}
+ops_model <- lm_basic(ops ~ school, data = stats)
+reg_table(ops_model, level = 0.95)
+```
+```{r}
+h_model1 <- lm_basic(h ~ school, data = stats)
+reg_table(h_model1, level = 0.95)
+```
+
+It is interesting to see that the R-squared multiple for the OPS regression is significantly lower than that of the hits and runs regression when looking at the different schools throughout the conference.
+
+#### Regression by Numeric Variables
+
+##### OPS
+```{r}
+ops_model2 <- lm_basic(runs ~ ops, data = stats)
+reg_table(ops_model2, level = 0.95)
+```
+```{r}
+ggplot(stats, aes(ops, runs)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+This regression shows that the positive correlation between runs and OPS is statistically significant.
+ 
+
+##### Hits
+```{r}
+h_model <- lm_basic(runs ~ h, data = stats)
+reg_table(h_model, level = 0.95)
+```
+```{r}
+ggplot(stats, aes(h, runs)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+The final model shows that the correlation between hits and runs is also positive and statistically significant. However, it is interesting to note that hits seem to be a stronger predictor of runs than OPS, as seen in the R-squared valued of both of the regressions.
+
+
+# Conclusion
+As expected, it is clear that hits and OPS are both positively correlated, significant indicators of runs scored. However, contrary to my original hypothesis, hits are a better indicator of runs scored than OPS. Furthermore, we are confident that players from George Washington University will likely score more runs than players from other universities. However, the school that the player attends does not play a significant factor in predicting how many runs they score when analyzing the other schools in the dataset.
