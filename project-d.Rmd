@@ -1,0 +1,95 @@
+---
+title: "Passing the Football"
+author: "DJ Lee"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggmap)
+library(viridis)
+library(forcats)
+library(smodels)
+```
+
+```{r}
+nfl <- read_csv("https://statsmaths.github.io/stat_data/nfl2015.csv")
+taxi <- read_csv("https://statsmaths.github.io/stat_data/nyc_taxi_50.csv")
+nba_shots <- read_csv("https://statsmaths.github.io/stat_data/nba_shots.csv")
+cancer <- read_csv("https://statsmaths.github.io/stat_data/cancer_inc_data.csv")
+```
+
+## Thesis
+
+It may be common knowledge that teams at the end of a football game like to hold their leads by running out the clock and running the football. Passing the ball can be risky because of the risk of interception and an incomplete pass means that the clock stops, giving the other team more time to score. However, the trend extends beyond the fourth quarter. In the fourth quarter, teams that are in the lead are less likely to pass the ball. Furthermore, teams that are in the lead throw the football less often than teams that are losing no matter what quarter of the game it is.
+
+```{r}
+nfl$score <- nfl$poss_team_score - nfl$def_team_score
+score_all <- group_summarize(nfl, score, quarter)
+score_all <- filter(score_all, score >= -21)
+score_all <- filter(score_all, score <= 21)
+
+ggplot(score_all, aes(score, pass_mean)) +
+  geom_point(aes(color = cut(score, 6), size = factor(quarter))) +
+  geom_smooth(method = "lm", color = "dark blue", alpha = 0) +
+  annotate("pointrange", x = 0, y = .575, ymin = .513, ymax = .655, color = "dark blue") +
+  annotate("rect", xmin = -2.5, xmax = 3.5, ymin = .375, ymax = .76, alpha = 0.2, fill = "dark blue") +
+  xlab("Score") +
+  ylab("Pass Mean") +
+  labs(color = "Score", size = "Quarter")
+```
+In the graph above, one can see that in close games - scores that range from  down by 3 to up by 3 - the variation in pass means is very small compared to other ranges of scores. In close games, teams are likely to pass the ball anywhere between 40% and 70% of the time. Furthermore, in tied games, the variation in pass means is even smaller ranging from only 50% to 65%. 
+
+One can also see on the graph above that the larger points - factored by quarters - seem to be below the trend line when teams are leading, but start to creep above the line when teams are tied or losing. This would further support the first part of the thesis above. Teams that are winning late in the game (third and fourth quarter) are especially less likely to pass the football and teams that are losing late in games are especially more likely to pass the ball.
+
+The next graph further describes the relationship between the score of the game and the pass mean, specifically in the fourth quarter.
+
+```{r}
+all_score <- group_summarize(nfl, score)
+all_score <- filter(score_all, score >= -21)
+all_score <- filter(score_all, score <= 21)
+
+q4 <- filter(nfl, quarter == 4)
+q4$score <- q4$poss_team_score - q4$def_team_score
+score4 <- group_summarize(q4, score)
+score4 <- filter(score4, score >= -14)
+score4 <- filter(score4, score <= 14)
+
+ggplot(score4, aes(score, pass_mean)) +
+  geom_line(aes(color = cut(score, 4))) +
+  geom_line(aes(y = first_down_mean, color = cut(score, 4))) +
+  xlab("Score") +
+  ylab("Mean") +
+  labs(color = "Score") +
+  ggtitle("4th Quarter") +
+  annotate("text", x = 0, y = 0.75, label = "Pass Mean") +
+  annotate("text", x = 0, y = .35, label = "First Down Mean")
+```
+
+The graph above further describes the how teams that are leading in the fourth quarter are significantly less likely to pass the football than teams that are losing in the fourth quarter. The graph also shows that teams that are winning the game are less likely convert first downs than teams that are losing the game. This could be because teams are less aggressive later in games when they are winning as opposed to when teams are losing and are forced to be more agressive.
+
+This leads to the next question. Are teams that pass the ball in the fourth quarter more successful at converting first downs? The next graph answers that question.
+
+```{r}
+ggplot(score4, aes(pass_mean, first_down_mean)) +
+  geom_point(aes(color = cut(score, 4))) +
+  geom_smooth(method = "lm", alpha = 0, color = "dark blue") +
+  xlab("Pass Mean") +
+  ylab("First Down Mean") +
+  labs(color = "Score") + 
+  ggtitle("4th Quarter")
+```
+
+There seems to be a clear positive trend between teams that pass the ball in the fourth quarter are more likely to convert first downs.
+
+
+
+
